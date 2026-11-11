@@ -212,6 +212,18 @@ export function createUI({
     hideTransition();
   }
 
+  function showGame() {
+    if (started) return;
+    started = true;
+    app.dataset.ready = "game";
+    app.classList.remove("is-launching");
+    app.classList.add("is-game", "is-playing");
+    hud.setAttribute("aria-hidden", "true");
+    landing.setAttribute("aria-hidden", "true");
+    startBtn.blur();
+    hideTransition();
+  }
+
   function updateMarkers(camera) {
     if (!started) return;
     const width = window.innerWidth;
@@ -274,6 +286,14 @@ export function createUI({
       return;
     }
 
+    if (app.dataset.ready !== "map") {
+      if (key === "escape") {
+        closeDetail();
+        setJournal(false);
+      }
+      return;
+    }
+
     if (key === "escape") {
       if (perfOpen) togglePerf(false);
       else if (journalOpen) setJournal(false);
@@ -328,6 +348,7 @@ export function createUI({
   return {
     beginLaunch,
     showMap,
+    showGame,
     showTransition,
     hideTransition,
     select,

@@ -5,6 +5,7 @@ import { createLanding } from "./landing.js";
 import { createMapWorld } from "./mapworld.js";
 import { MapControls } from "./mapcontrols.js";
 import { createUI } from "./ui.js";
+import { createGame } from "./game.js";
 import { LANDMARKS, MAP_START } from "./data.js";
 
 const FRAME_INTERVAL = 1000 / 60;
@@ -44,6 +45,7 @@ function init() {
   let landing;
   let mapWorld;
   let controls;
+  let game = null;
 
   try {
     landing = createLanding();
@@ -65,6 +67,7 @@ function init() {
   let launchStarted = 0;
   let launchWarmed = false;
   let transitionShown = false;
+  let launchingToGame = false;
   let lastCoords = 0;
 
   function setEco(next) {
@@ -81,7 +84,7 @@ function init() {
   }
 
   const ui = createUI({
-    onStart: () => startExperience(),
+    onStart: () => startGameExperience(),
     onFly: (landmark, instant) => {
       if (!landmark) return;
       controls.flyTo(landmark.viewTarget, landmark.viewDistance, { instant: Boolean(instant) });
@@ -124,19 +127,49 @@ function init() {
     }
   }
 
-  function startExperience() {
+  function ensureGame() {
+    if (game) return game;
+    try {
+      game = createGame({ stage });
+      game.resize(window.innerWidth, window.innerHeight);
+    } catch (error) {
+      console.error(error);
+      showFatal("Dunia permainan gagal dimuat. Muat ulang halaman untuk mencoba lagi.");
+      game = null;
+    }
+    return game;
+  }
+
+  function enterGame() {
+    if (mode === "game") return;
+    const instance = ensureGame();
+    if (!instance) return;
+    mode = "game";
+    controls.enabled = false;
+    instance.start();
+    ui.showGame();
+    dirty = true;
+  }
+
+  function startGameExperience() {
     if (mode !== "landing") return;
     mode = "launching";
     launchStarted = performance.now();
     transitionShown = false;
+    launchingToGame = true;
     ui.beginLaunch();
     landing.start();
     dirty = true;
   }
 
+  const mapBtn = document.querySelector("#mapBtn");
+  if (mapBtn) mapBtn.addEventListener("click", () => startExperience());
+
   const params = new URLSearchParams(window.location.search);
-  if (params.has("play") || params.has("spot")) {
+  if (params.has("peta") || params.has("spot")) {
     enterMap({ instant: true, spot: params.get("spot") });
+  } else if (params.has("play")) {
+    enterGame();
   } else {
     window.setTimeout(() => {
       if (mode === "landing") mapWorld.warmup(START_TARGET);
@@ -163,6 +196,7 @@ function init() {
     stage.setSize(w, h);
     landing.resize(w, h);
     mapWorld.setAspect(w / Math.max(h, 1));
+    if (game) game.resize(w, h);
     dirty = true;
   }
 
@@ -193,11 +227,16 @@ function init() {
       controls,
       ui,
       stage,
+      get game() {
+        return game;
+      },
       get mode() {
         return mode;
       },
       get camera() {
-        return mode === "map" ? mapWorld.camera : landing.camera;
+        if (mode === "map") return mapWorld.camera;
+        if (mode === "game") return game?.camera;
+        return landing.camera;
       },
     };
   }
@@ -225,17 +264,25 @@ function init() {
           transitionShown = true;
           ui.showTransition();
         }
-        if (elapsed > 620 && !launchWarmed) {
+        if (elapsed > 620 && !launchWarmed && !launchingToGame) {
           prepareMap();
         }
         if (elapsed > 1160) {
-          enterMap({ instant: true });
+          if (launchingToGame) enterGame();
+          else enterMap({ instant: true });
         }
       }
 
       landing.update(dt, worldTime);
       worldTime += dt;
       stage.renderer.render(landing.scene, landing.camera);
+      dirty = false;
+      return;
+    }
+
+    if (mode === "game") {
+      game.update(dt);
+      stage.renderer.render(game.scene, game.camera);
       dirty = false;
       return;
     }
