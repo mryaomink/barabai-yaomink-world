@@ -1,0 +1,26 @@
+# Dependensi
+node_modules/
+
+# Hasil build
+dist/
+
+# Log
+*.log
+npm-debug.log*
+
+# Sistem & editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Lingkungan
+.env
+.env.*
+!.env.example
+
+# Cache
+.vite/
+*.local

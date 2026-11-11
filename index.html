@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#69c5c2" />
+    <meta
+      name="description"
+      content="Barabai Yaomink World — jelajahi peta tanpa batas berisi rumah panggung, pasar apam, masjid, sungai, dan bukit khas Barabai, Hulu Sungai Tengah."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2369c5c2'/%3E%3Ccircle cx='32' cy='31' r='17' fill='%2375a064' stroke='%232f3b36' stroke-width='3'/%3E%3Cpath d='M15 34c8-4 12-1 18-3s11-4 17-1c-3 8-9 12-18 12s-14-4-17-8Z' fill='%23f2ecdd' stroke='%232f3b36' stroke-width='2'/%3E%3Ccircle cx='32' cy='18' r='4' fill='%23d6a348' stroke='%232f3b36' stroke-width='2'/%3E%3C/svg%3E"
+    />
+    <title>Barabai Yaomink World — Peta Kecil yang Tak Habis</title>
+  </head>
+  <body>
+    <main id="app" data-ready="landing">
+      <div id="stage" aria-hidden="true"></div>
+      <div class="sea-specks" aria-hidden="true"></div>
+
+      <section id="landing" class="landing" aria-label="Pembuka Barabai Yaomink World">
+        <div class="landing-top">
+          <p class="landing-kicker"><span class="mini-dot"></span> Dunia mini · Hulu Sungai Tengah</p>
+          <p class="landing-coords">2°35′ LS · 115°23′ BT</p>
+        </div>
+
+        <div class="landing-bottom">
+          <p class="landing-tagline">Barabai, pelan-pelan.</p>
+          <button id="startBtn" class="start-btn" type="button">
+            <span>MULAI</span>
+          </button>
+          <p class="landing-hint">Seret · Zoom · Temukan</p>
+        </div>
+      </section>
+
+      <div id="hud" class="hud" aria-hidden="true">
+        <header class="hud-top">
+          <div class="brand">
+            <div class="brand-badge" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="19" fill="#75a064" stroke="#2f3b36" stroke-width="2.5" />
+                <path d="M10 29c6-3 9-1 14-2s9-3 14-1c-2 6-7 10-14 10s-11-3-14-7Z" fill="#f2ecdd" stroke="#2f3b36" stroke-width="1.8" />
+                <circle cx="24" cy="16" r="3.5" fill="#d6a348" stroke="#2f3b36" stroke-width="1.8" />
+                <path d="M18 35h12" stroke="#2f3b36" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div class="brand-text">
+              <p class="brand-kicker">Peta infinite · Barabai</p>
+              <h1>Yaomink <span>World</span></h1>
+            </div>
+          </div>
+
+          <div class="hud-actions">
+            <button id="journalBtn" class="pill-btn" type="button" aria-expanded="false">
+              <span class="pill-icon" aria-hidden="true">✦</span>
+              <span>Temuan</span>
+              <b id="foundCount">0</b><span class="pill-sep">/</span><span id="foundTotal">7</span>
+            </button>
+            <button
+              id="ecoBtn"
+              class="icon-btn"
+              type="button"
+              aria-pressed="false"
+              aria-label="Hemat daya"
+              title="Hemat daya saat kamera diam"
+            >
+              <span class="leaf-icon" aria-hidden="true">◒</span>
+            </button>
+            <button
+              id="perfBtn"
+              class="icon-btn"
+              type="button"
+              aria-pressed="false"
+              aria-label="Statistik performa"
+              title="Statistik performa (P)"
+            >
+              <span aria-hidden="true">i</span>
+            </button>
+          </div>
+        </header>
+
+        <div id="markers" class="markers" aria-label="Penanda lokasi"></div>
+
+        <aside id="journal" class="journal" aria-hidden="true">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Catatan perjalanan</p>
+              <h2>Temuan</h2>
+            </div>
+            <button id="journalClose" class="close-btn" type="button" aria-label="Tutup temuan">
+              <span aria-hidden="true"></span>
+            </button>
+          </div>
+          <p class="journal-lead">Tujuh tempat kecil untuk mulai mengenal Barabai.</p>
+          <ol id="journalList" class="journal-list"></ol>
+          <p class="journal-foot">Klik satu temuan untuk mendekat.</p>
+        </aside>
+
+        <aside id="detail" class="detail" aria-hidden="true" aria-live="polite">
+          <button id="detailClose" class="close-btn" type="button" aria-label="Tutup detail">
+            <span aria-hidden="true"></span>
+          </button>
+          <p id="detailIndex" class="detail-index">Temuan 01</p>
+          <h2 id="detailTitle">Alun-Alun Barabai</h2>
+          <p id="detailTag" class="detail-tag">Pusat kota</p>
+          <p id="detailBody" class="detail-body"></p>
+          <div id="detailFacts" class="detail-facts"></div>
+          <button id="detailFly" class="detail-fly" type="button">
+            <span>Dekati</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </aside>
+
+        <div class="hud-bottom">
+          <p class="hint-pill">
+            <span><kbd>Seret</kbd> jelajah</span>
+            <span class="hint-dot" aria-hidden="true"></span>
+            <span><kbd>Scroll</kbd> zoom</span>
+            <span class="hint-dot" aria-hidden="true"></span>
+            <span><kbd>WASD</kbd> gerak</span>
+          </p>
+          <div class="map-tools">
+            <span id="coords" class="coords">0, 0</span>
+            <div class="zoom-box" aria-label="Kontrol peta">
+              <button id="zoomIn" type="button" aria-label="Perbesar peta">+</button>
+              <button id="zoomOut" type="button" aria-label="Perkecil peta">−</button>
+              <button id="resetView" type="button" aria-label="Kembali ke awal">⌂</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="toast" class="toast" role="status" aria-live="polite">
+          <span class="toast-kicker">Temuan baru</span>
+          <strong id="toastTitle">Alun-Alun Barabai</strong>
+        </div>
+
+        <section id="perf" class="perf" aria-hidden="true">
+          <div class="perf-head">
+            <span>Performa</span>
+            <span id="perfMode" class="perf-mode">Lancar</span>
+          </div>
+          <dl class="perf-grid">
+            <div><dt>FPS</dt><dd id="perfFps">—</dd></div>
+            <div><dt>Frame</dt><dd id="perfFrame">—</dd></div>
+            <div><dt>Draw call</dt><dd id="perfCalls">—</dd></div>
+            <div><dt>Segitiga</dt><dd id="perfTris">—</dd></div>
+            <div><dt>Pixel ratio</dt><dd id="perfDpr">—</dd></div>
+            <div><dt>Chunk</dt><dd id="perfChunks">—</dd></div>
+          </dl>
+          <p class="perf-note">Tekan <kbd>P</kbd> untuk menutup</p>
+        </section>
+      </div>
+
+      <div id="transition" class="transition" aria-hidden="true">
+        <div class="transition-card">
+          <p class="transition-kicker">Membuka Barabai</p>
+          <p class="transition-copy">Pelan-pelan saja.</p>
+          <span class="transition-line" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <div id="fatal" class="fatal" hidden>
+        <div class="fatal-card">
+          <p class="fatal-kicker">Barabai Yaomink World</p>
+          <h2>WebGL tidak tersedia</h2>
+          <p id="fatalText">
+            Peramban ini belum bisa menampilkan peta 3D. Coba aktifkan akselerasi perangkat keras
+            atau buka dengan peramban terbaru.
+          </p>
+          <button type="button" onclick="location.reload()">Muat ulang</button>
+        </div>
+      </div>
+    </main>
+
+    <noscript>
+      <div class="fatal">
+        <div class="fatal-card">
+          <h2>JavaScript diperlukan</h2>
+          <p>Aktifkan JavaScript untuk menjelajahi Barabai Yaomink World.</p>
+        </div>
+      </div>
+    </noscript>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
